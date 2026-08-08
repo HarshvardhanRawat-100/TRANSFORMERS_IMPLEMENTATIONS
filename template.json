@@ -1,0 +1,17 @@
+{
+    "name": null,
+    "input_variables": [
+        "length_input",
+        "paper_input",
+        "style_input"
+    ],
+    "optional_variables": [],
+    "output_parser": null,
+    "partial_variables": {},
+    "metadata": null,
+    "tags": null,
+    "template": "\nSummarize the research paper titled \"{paper_input}\".\n\nExplanation Style: {style_input}\nExplanation Length: {length_input}\n\nInstructions:\n- Explain clearly based on known knowledge of the paper\n- Include key ideas, architecture, and contributions\n- Add mathematical intuition if relevant\n- Use analogies to simplify concepts\n\nDo NOT say \"insufficient information\".\n",
+    "template_format": "f-string",
+    "validate_template": true,
+    "_type": "prompt"
+}
