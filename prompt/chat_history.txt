@@ -23,3 +23,46 @@ AI: Your order is not in our list.
 Human: refund issue
 AI: I would be happy to help you with your refund issue. Could you please provide the order number associated with the refund?
 AI: Your order is not in our list.
+Human: #12345 order refund updates?
+AI: Your order is not in our list.
+Human: refund?
+AI: I can certainly help you with your refund. To get started, could you please provide your order number?
+Human: #12345
+AI: Your order is not in our list.
+Human: from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+AI: It looks like you've shared some Python code! How can I assist you today? If you have any questions about an order, a refund, or any of our products, please let me know!
+Human: from langchain_core.messages import HumanMessage, AIMessage
+AI: It looks like you're sharing some more Python code related to LangChain! 
+
+How can I help you today? If you have any questions about an order, a refund, or anything else, please let me know!
+Human: from langchain_google_genai import ChatGoogleGenerativeAI
+AI: It looks like you're continuing to share some Python code for working with LangChain and Google Generative AI! 
+
+As a customer support agent, I'm here to help you with any questions you might have about our products, services, refunds, or orders. 
+
+How can I assist you today?
+Human: import os
+AI: It looks like you're importing Python modules! 
+
+How can I help you today? If you have any questions about an order, refund, or anything else, please let me know!
+Human: from dotenv import load_dotenv
+AI: It looks like you're loading environment variables in Python! 
+
+How can I help you today? If you have any questions about an order, a refund, or anything else, please let me know!
+Human: 
+Human: hi
+AI: Hello! How can I help you today?
+Human: hi
+AI: Hello! How can I help you today?
+Human: #12345 order refund update
+AI: I could not find that information in our records. Is there anything else I can assist you with?
+Human: #12345
+AI: Could you please clarify which information you need regarding your order #12345?
+Human: refund
+AI: I'm sorry, but I currently don't have the specific information you're looking for regarding your refund for order #12345. I recommend checking your account or contacting our customer service for more details.
+Human: check your chat_history.txt section first 2 message
+AI: I could not find that information in our records.
+Human: HumanMessage(content="I want to request a refund for my order #12345.") here it is
+AI: I'm sorry, but I don't have access to 'chat_history.txt' or any specific file content provided to me. My capabilities are limited to the information available in this conversation. If you have any other questions or need further assistance, please let me know!
+Human: can you tell me my past convos
+AI: I don't have access to your past conversations. Please provide the necessary details so I can assist you better.

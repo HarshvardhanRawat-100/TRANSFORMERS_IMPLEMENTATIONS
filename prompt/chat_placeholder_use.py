@@ -1,106 +1,162 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 import os
 from dotenv import load_dotenv
-import re
 
-# ✅ Load env
 load_dotenv()
 
-# ✅ Correct file path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.join(BASE_DIR, "chat_history.txt")
 
-# ✅ Use correct Gemini model
-model = ChatGoogleGenerativeAI(
-    model="gemini-3.5-flash",
-    temperature=0.7
+
+llm = HuggingFaceEndpoint(
+    repo_id="Qwen/Qwen2.5-1.5B-Instruct",
+    task="text-generation",
+    huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_ACCESS_TOKEN"),
+    provider="featherless-ai"
 )
 
-# ✅ Prompt Template
+model = ChatHuggingFace(llm=llm)
+
+
+
+# Prompt Template
+
 chat_template = ChatPromptTemplate([
-    ('system',
-     '''You are a helpful customer support agent.
+    (
+        'system',
+        '''You are a helpful customer support agent.
 
-If user asks about an order:
+ONLY answer from the chat history provided.
 
-- Valid order numbers are: #123, #456, #789
-- If order number is NOT in this list, reply:
-  "Your order is not in our list."
-'''),
+If the answer is NOT in chat history, say:
+"I could not find that information in our records."
+'''
+    ),
+
     MessagesPlaceholder(variable_name='chat_history'),
+
     ('human', '{query}')
 ])
 
+
 # ===== LOAD CHAT HISTORY =====
+
 chat_history = []
 
+
 def load_history():
+
+    chat_history.clear()
+
     try:
+
         with open(file_path, "r") as f:
+
             for line in f:
+
+                line = line.strip()
+
+                if not line:
+                    continue
+
                 if line.startswith("Human:"):
-                    chat_history.append(
-                        HumanMessage(content=line.replace("Human:", "").strip())
-                    )
+
+                    content = line.replace("Human:", "", 1).strip()
+
+                    if content:
+                        chat_history.append(
+                            HumanMessage(content=content)
+                        )
+
                 elif line.startswith("AI:"):
-                    chat_history.append(
-                        AIMessage(content=line.replace("AI:", "").strip())
-                    )
+
+                    content = line.replace("AI:", "", 1).strip()
+
+                    if content:
+                        chat_history.append(
+                            AIMessage(content=content)
+                        )
+
     except FileNotFoundError:
+
         pass
 
 
-# ===== SAVE CHAT HISTORY =====
+# ===== SAVE HISTORY =====
+
 def save_message(role, content):
+
     with open(file_path, "a") as f:
+
         f.write(f"{role}: {content}\n")
 
 
-# Load previous chat
+# ===== CLEAN TEXT =====
+
+def get_text(response):
+
+    if isinstance(response.content, str):
+
+        return response.content
+
+    elif isinstance(response.content, list):
+
+        return " ".join(
+            block.get("text", "")
+            for block in response.content
+            if isinstance(block, dict)
+        )
+
+    return str(response)
+
+
+# Load old chat
+
 load_history()
 
+
 # ===== CHAT LOOP =====
+
 print("🤖 Chatbot started (type 'exit' to stop)\n")
 
+
 while True:
+
     user_input = input("You: ")
 
-    # ✅ EXIT FIRST
     if user_input.lower() == "exit":
-        print("Goodbye!")
+
+        print("goodbye")
+
         break
 
-    # ✅ Extract order from user input
-    user_orders = re.findall(r"#\d+", user_input)
 
-    # ✅ Valid orders (hardcoded)
-    valid_orders = ["#123", "#456", "#789"]
+    # Reload full history
 
-    # ===== CUSTOM ORDER LOGIC =====
-    if user_orders:
-        if any(order in valid_orders for order in user_orders):
-            ai_reply = f"Your order {user_orders[0]} is found and is being processed."
-        else:
-            ai_reply = "Your order is not in our list."
-    else:
-        # ===== LLM RESPONSE =====
-        chat_history.append(HumanMessage(content=user_input))
-        save_message("Human", user_input)
+    load_history()
 
-        prompt = chat_template.invoke({
-            'chat_history': chat_history,
-            'query': user_input
-        })
 
-        response = model.invoke(prompt)
+    # Create prompt
 
-        ai_reply = response.text
+    prompt = chat_template.invoke({
+        'chat_history': chat_history,
+        'query': user_input
+    })
 
-    # ✅ PRINT
+
+    # LLM response
+
+    response = model.invoke(prompt)
+
+    ai_reply = get_text(response)
+
     print("AI:", ai_reply)
 
-    # ✅ SAVE AI RESPONSE
-    chat_history.append(AIMessage(content=ai_reply))
+
+    # Save messages AFTER response
+
+    save_message("Human", user_input)
+
     save_message("AI", ai_reply)
