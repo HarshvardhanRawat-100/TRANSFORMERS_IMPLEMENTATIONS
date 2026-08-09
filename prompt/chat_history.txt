@@ -1,2 +1,25 @@
 HumanMessage(content="I want to request a refund for my order #12345.")
-AIMessage(content="Your refund request for order #12345 has been initiated. It will be processed in 3-5 business days.")
+AIMessage(content="Your refund request for order #12345 has been initiated. It will be processed in 3-5 business days.")Human: hi
+Human: hi
+Human: hi
+Human: hi
+AI: Hello! How can I help you today?
+Human: whats my order update
+AI: I would be happy to help you with that! Could you please provide your order number?
+Human: #1234
+AI: Your order is not in our list.
+Human: #12345
+AI: Your order is not in our list.
+Human: order #12345 update?
+AI: Your order is not in our list.
+Human: refund list check
+AI: I can certainly help you check the status of your refund. Could you please provide the order number associated with the refund?
+Human: #12345 refund list 
+AI: Your order is not in our list.
+Human: hi
+Human: hi
+AI: [{'type': 'text', 'text': 'Hello! How can I help you today?', 'extras': {'signature': 'EuoECucEARFNMg8tJE8omQAYz0XLtHOHJRA/2yMuBuHmRvkI7qksSMiRFRj/Grm4PK5VI2XuMQPKso3HwQ16lZivpOmca+fTL8Njtb0AUAuhIFV5hX1Vk6Tybcr+4/7l3K8198rLifvmcmeRh3bVqOu3fAt0dfOyezvHr/YiGl/OIjn+/SbXkYOW51scPikpeU11rE7sclJA8u6/yBip43GNClkAnNkj4WPpWMAOw2rtUpsODwr01Z5+CtieBLCyH3zV5SH/pFsR6fcE1Il7nBwv5fFqJ4yRmdX6QYkt7EnXbZRJr4K5Yt0oA05+DgbeOkS+90s+fwa8gx74sIkoiN8fYbeCqL5ROFkf/9ANyGAY7W/qXcnjCV1DpRUTm7tQZZ0CtN4nUD/xK7/qaHGXk8aFJ/sD6ZK4+FYHkXn+oKnNvek2LarfmnPcmXTe/W+ZwklSGHTlLoWKYU+EBPKPUiv0RScaue54L8fNcSmYR0SFrbEPJ62kjMo0FlxpPEtAOxTseOIV1QeoGxbrHc4j4IchM9sxIh3/GRh2sB0t34UUvF/7hdOLzfn3TsSxr1hhRC6K+eQ8im8AEHmA4tgbCKtGf7+HUQXY5DplMZ3SQXdTjKLZZuoppnYzspnqGAW360yQFEsZvlNgUwSgqwU92aH5Tlha1tXyl6MnDoXszsn6VmZDPwKVZlOumGbM509hIhfVadK4O0fWjDdweoX1obz7rV519AS92pdLSXskFvWUnyZ8x/wR0Vkdh90Uprrx17bk8qR9P4n9B0elFyIYIclPD+xP4x5HV5/sJhHSdBUm9cWWQoHnOMwRme9s'}}]
+AI: Your order is not in our list.
+Human: refund issue
+AI: I would be happy to help you with your refund issue. Could you please provide the order number associated with the refund?
+AI: Your order is not in our list.
