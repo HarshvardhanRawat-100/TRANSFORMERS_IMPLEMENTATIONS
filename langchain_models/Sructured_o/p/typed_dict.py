@@ -1,6 +1,6 @@
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 from dotenv import load_dotenv
-from typing import TypedDict
+from typing import TypedDict , Annotated , Optional ,Literal
 import os
 
 load_dotenv()
@@ -16,8 +16,12 @@ model = ChatHuggingFace(llm=llm)
 
 class Review(TypedDict) :
 
-    summary : str
-    sentiment : str
+    key_themes: Annotated[list[str], "Write down all the key themes discussed in the review in a list"]
+    summary: Annotated[str, "A brief summary of the review"]
+    sentiment: Annotated[Literal["pos", "neg","neutral"], "Return sentiment of the review either negative, positive or neutral"]
+    pros: Annotated[Optional[list[str]], "Write down all the pros inside a list"]
+    cons: Annotated[Optional[list[str]], "Write down all the cons inside a list"]
+    name: Annotated[str, "Write the name of the reviewer"]
 
 structure_op = model.with_structured_output(Review) 
 
@@ -31,7 +35,7 @@ Pros:
 Insanely powerful processor (great for gaming and productivity)
 Stunning 200MP camera with incredible zoom capabilities
 Long battery life with fast charging
-S-Pen support is unique and useful""")
+S-Pen support is unique and useful
+Review by Harshvardhan Rawat                             """)
 
-print(result['summary'])
-print(result['sentiment'])
+print(result)
