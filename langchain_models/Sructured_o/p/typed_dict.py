@@ -1,7 +1,7 @@
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 from dotenv import load_dotenv
 from typing import TypedDict
-
+import os
 
 load_dotenv()
 
