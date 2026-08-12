@@ -37,10 +37,10 @@ prompt3 = PromptTemplate(
 
 parser = StrOutputParser()
 
-parallel_chain = RunnableParallel(
+parallel_chain = RunnableParallel({
     'notes' : prompt1 | model1 | parser ,
     'quiz' : prompt2 | model2 | parser
-)
+})
 
 merge_chain = parallel_chain | prompt3 | model2 | parser
 
@@ -67,4 +67,8 @@ The support vector machines in scikit-learn support both dense (numpy.ndarray an
 """
 
 
-result 
+result  = merge_chain.invoke({'text' : text})
+
+print(result)
+
+merge_chain.get_graph().print_ascii()
