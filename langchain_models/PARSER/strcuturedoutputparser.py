@@ -1,7 +1,10 @@
+#OLD CODE , ONLY WORKS ON OLDER LANGCHAIN MODEL
+
+
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 from dotenv import load_dotenv
 from langchain_core.prompts import PromptTemplate
-from langchain.output_parsers import StructuredOutputParser, ResponseSchema
+from langchain_core.output_parsers import StructuredOutputParser, ResponseSchema
 
 load_dotenv()
 
@@ -26,3 +29,9 @@ template = PromptTemplate(
     input_variables=['topic'],
     partial_variables={'format_instruction':parser.get_format_instructions()}
 )
+
+chain = template | model | parser
+
+result = chain.invoke({'topic':'black hole'})
+
+print(result)
