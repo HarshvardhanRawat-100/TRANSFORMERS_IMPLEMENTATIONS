@@ -34,3 +34,4 @@ result = chain.invoke({'topic' : 'Tell me about LLM'})
 
 print(result)
 
+chain.get_graph().print_ascii()
