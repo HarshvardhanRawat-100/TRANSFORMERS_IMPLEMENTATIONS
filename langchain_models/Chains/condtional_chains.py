@@ -25,7 +25,6 @@ prompt1 = PromptTemplate(
     input_variables=['feedback'],
     partial_variables={'format_instruction':parser2.get_format_instructions()}
 )
-
 classifier_chain = prompt1 | model | parser2
 
 prompt2 = PromptTemplate(
