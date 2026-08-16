@@ -4,12 +4,10 @@ print(langchain.__version__)
 from dotenv import load_dotenv
 import os
 import google.generativeai as genai
+import os
+from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv("/Users/harshvardhanrawat/Desktop/TRANSFORMER/.env")
 
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
-for m in genai.list_models():
-    print(m.name)
-
+print(os.getenv("GEMINI_API_KEY_2"))
 
