@@ -44,3 +44,25 @@ retriever = vectorstore.as_retriever(
     search_kwargs={"k": 4}
 )
 print(retriever.invoke("what is RLHF"))
+
+# AUGEMENTATION
+
+model = ChatGoogleGenerativeAI(model = "gemini-3.5-flash",temperature=0.7 , google_api_key=os.getenv("GOOGLE_API_KEY_2"))
+
+prompt = PromptTemplate(
+    template="""
+      You are a helpful assistant.
+      Answer ONLY from the provided transcript context.
+      If the context is insufficient, just say you don't know.
+
+      {context}
+      Question: {question}
+    """,
+    input_variables = ['context', 'question']
+)
+
+question          = "How does training in LLM look like"
+retrieved_docs    = retriever.invoke(question)
+context_text = "\n\n".join(doc.page_content for doc in retrieved_docs)
+final_prompt = prompt.invoke({"context": context_text, "question": question})
+
