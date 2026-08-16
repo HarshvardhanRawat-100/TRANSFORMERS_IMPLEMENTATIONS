@@ -5,6 +5,8 @@ from langchain_core.prompts import PromptTemplate
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings , ChatGoogleGenerativeAI
 import os
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough, RunnableLambda
+from langchain_core.output_parsers import StrOutputParser
 
 load_dotenv()
 #  INDEXING (document ingestion)
@@ -43,7 +45,6 @@ retriever = vectorstore.as_retriever(
     search_type="similarity",
     search_kwargs={"k": 4}
 )
-print(retriever.invoke("what is RLHF"))
 
 # AUGEMENTATION
 
@@ -61,8 +62,19 @@ prompt = PromptTemplate(
     input_variables = ['context', 'question']
 )
 
-question          = "How does training in LLM look like"
-retrieved_docs    = retriever.invoke(question)
-context_text = "\n\n".join(doc.page_content for doc in retrieved_docs)
-final_prompt = prompt.invoke({"context": context_text, "question": question})
 
+def format_docs(retrieved_docs):
+  context_text = "\n\n".join(doc.page_content for doc in retrieved_docs)
+  return context_text
+
+parallel_chain = RunnableParallel({
+    'context': retriever | RunnableLambda(format_docs),
+    'question': RunnablePassthrough()
+})
+
+parser = StrOutputParser()
+
+main_chain = parallel_chain | prompt | model | parser 
+
+print(main_chain.invoke("TELL ME ABOUT LLM TRAINING"))
+main_chain.get_graph().print_ascii()
