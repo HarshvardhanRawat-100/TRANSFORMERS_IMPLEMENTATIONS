@@ -24,3 +24,14 @@ except TranscriptsDisabled:
 
 splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 chunks = splitter.create_documents([transcript])
+
+# CONVERTING TO EMBEDDING AND STORING IT IN FAISS VECTOR DB
+embeddings = GoogleGenerativeAIEmbeddings(
+    model="gemini-embedding-001"
+)
+
+vectorstore = FAISS.from_documents(
+    chunks,
+    embeddings
+)
+
