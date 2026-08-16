@@ -77,4 +77,5 @@ parser = StrOutputParser()
 main_chain = parallel_chain | prompt | model | parser 
 
 print(main_chain.invoke("TELL ME ABOUT LLM TRAINING"))
+
 main_chain.get_graph().print_ascii()
