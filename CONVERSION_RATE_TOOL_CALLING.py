@@ -18,13 +18,9 @@ model = ChatGoogleGenerativeAI(
 API_KEY = os.getenv("EXCHANGE_RATE_API_KEY")
 
 
-# ---------------- TOOL 1 ----------------
-
 @tool
 def get_conversion_factor(base_currency: str, target_currency: str) -> float:
-    """
-    Fetches the currency conversion factor between two currencies.
-    """
+    """Fetches the currency conversion factor between two currencies."""
 
     url = f"https://v6.exchangerate-api.com/v6/{API_KEY}/pair/{base_currency}/{target_currency}"
 
@@ -34,29 +30,21 @@ def get_conversion_factor(base_currency: str, target_currency: str) -> float:
     return data["conversion_rate"]
 
 
-# ---------------- TOOL 2 ----------------
-
 @tool
 def convert(
     base_currency_value: int,
     conversion_rate: Annotated[float, InjectedToolArg]
 ) -> float:
-    """
-    Converts the base currency value using the conversion rate.
-    """
+    """Converts the base currency value using the conversion rate."""
 
     return base_currency_value * conversion_rate
 
-
-# ---------------- TOOL BINDING ----------------
 
 llm_with_tools = model.bind_tools([
     get_conversion_factor,
     convert
 ])
 
-
-# ---------------- USER MESSAGE ----------------
 
 messages = [
     HumanMessage(
@@ -66,8 +54,7 @@ messages = [
 ]
 
 
-# ---------------- FIRST LLM CALL ----------------
-
+# 1. LLM decides which tool it needs
 ai_message = llm_with_tools.invoke(messages)
 
 print("AI TOOL CALLS:")
@@ -76,31 +63,42 @@ print(ai_message.tool_calls)
 messages.append(ai_message)
 
 
-# ---------------- TOOL EXECUTION ----------------
-
+# 2. Execute get_conversion_factor
 conversion_rate = None
 
 for tool_call in ai_message.tool_calls:
 
     if tool_call["name"] == "get_conversion_factor":
 
-        tool_message1 = get_conversion_factor.invoke(tool_call)
+        tool_message = get_conversion_factor.invoke(tool_call)
 
-        conversion_rate = tool_message1.content
+        conversion_rate = float(tool_message.content)
 
-        messages.append(tool_message1)
+        print("Conversion rate:", conversion_rate)
 
-    elif tool_call["name"] == "convert":
-
-        tool_call["args"]["conversion_rate"] = conversion_rate
-
-        tool_message2 = convert.invoke(tool_call)
-
-        messages.append(tool_message2)
+        messages.append(tool_message)
 
 
-# ---------------- FINAL LLM CALL ----------------
+# 3. Execute convert manually
+converted_value = convert.invoke({
+    "base_currency_value": 10,
+    "conversion_rate": conversion_rate
+})
 
+print("Converted value:", converted_value)
+
+
+# 4. Give final result to LLM
+messages.append(
+    HumanMessage(
+        content=f"The conversion rate is {conversion_rate}. "
+                f"10 INR is {converted_value} USD. "
+                f"Give the user the final answer."
+    )
+)
+
+
+# 5. Final LLM response
 final_response = llm_with_tools.invoke(messages)
 
 print("\nFINAL ANSWER:")
