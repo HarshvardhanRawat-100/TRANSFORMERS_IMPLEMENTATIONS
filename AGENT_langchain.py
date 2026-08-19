@@ -1,35 +1,42 @@
-import requests
-from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
 import os
-from langchain_core.tools import tool
+from dotenv import load_dotenv
+
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.tools import DuckDuckGoSearchRun
+from langchain.agents import create_agent
 
 load_dotenv()
 
-model = ChatGoogleGenerativeAI(model = "gemini-3.5-flash",temperature=0.7 , google_api_key=os.getenv("GOOGLE_API_KEY_2"))
+# LLM
+model = ChatGoogleGenerativeAI(
+    model="gemini-3.5-flash",
+    temperature=0.7,
+    google_api_key=os.getenv("GOOGLE_API_KEY_2")
+)
 
+# Tool
 search_tool = DuckDuckGoSearchRun()
-from langchain.agents import create_react_agent, AgentExecutor
-from langchain import hub
 
-# Step 2: Pull the ReAct prompt from LangChain Hub
-prompt = hub.pull("hwchase17/react")  # pulls the standard ReAct agent prompt
-
-#Step 3 : Create the ReAct agent manually with the pulled prompt
-agent = create_react_agent(
-    llm = model , 
-    tools = [search_tool],
-    prompt = prompt 
-)
-
-#Step 4 : Wrap it with AgentExecutor
-agent_executor = agent_executor(
-    agent = agent ,
+# Agent
+agent = create_agent(
+    model=model,
     tools=[search_tool],
-    verbose=True
+    system_prompt="""
+    You are a helpful research agent.
+    For every factual question, use the DuckDuckGo search tool
+    to verify the information before answering.
+    """
 )
 
-# Step 5: Invoke
-response = agent_executor.invoke({"input": "Find the capital of Madhya Pradesh, top 5 places in madhya pradesh "})
-print(response)
+# Run agent
+response = agent.invoke({
+    "messages": [
+        (
+            "user",
+            "Find the capital of Madhya Pradesh and the top 5 places in Madhya Pradesh."
+        )
+    ]
+})
+
+# Print only the final answer
+print(response["messages"][-1].content)
