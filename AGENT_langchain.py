@@ -15,3 +15,10 @@ from langchain import hub
 
 # Step 2: Pull the ReAct prompt from LangChain Hub
 prompt = hub.pull("hwchase17/react")  # pulls the standard ReAct agent prompt
+
+#Step 3 : Create the ReAct agent manually with the pulled prompt
+agent = create_react_agent(
+    llm = model , 
+    tools = [search_tool],
+    prompt = prompt 
+)
