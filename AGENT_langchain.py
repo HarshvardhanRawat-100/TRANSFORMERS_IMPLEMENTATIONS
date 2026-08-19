@@ -22,3 +22,14 @@ agent = create_react_agent(
     tools = [search_tool],
     prompt = prompt 
 )
+
+#Step 4 : Wrap it with AgentExecutor
+agent_executor = agent_executor(
+    agent = agent ,
+    tools=[search_tool],
+    verbose=True
+)
+
+# Step 5: Invoke
+response = agent_executor.invoke({"input": "Find the capital of Madhya Pradesh, top 5 places in madhya pradesh "})
+print(response)
