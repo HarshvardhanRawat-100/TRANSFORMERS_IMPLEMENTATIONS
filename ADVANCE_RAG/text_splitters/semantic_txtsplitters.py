@@ -18,5 +18,3 @@ Scientists warn that immediate action is needed to reduce carbon emissions.
 Renewable energy sources offer hope for a sustainable future."""
 
 
-
-
