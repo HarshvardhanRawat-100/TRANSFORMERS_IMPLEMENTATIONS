@@ -34,9 +34,9 @@ docs = [
              metadata={"topic": "biology"}),
 ]
 
-for i , doc in enumerate(docs,1) :
-    print(f"Doc no. : {i} | Topic : {doc.metadata['topic']} ")
-    print(f"Content : {doc.page_content}\n")
+#for i , doc in enumerate(docs,1) :
+   # print(f"Doc no. : {i} | Topic : {doc.metadata['topic']} ")
+   # print(f"Content : {doc.page_content}\n")
 
 embed = GoogleGenerativeAIEmbeddings(
     model="gemini-embedding-2-preview",
@@ -45,12 +45,25 @@ embed = GoogleGenerativeAIEmbeddings(
 
 vectorstore = Chroma.from_documents(
     documents=docs,
-    embedding=embeddings,
+    embedding=embed,
     collection_name="similarity_search_demo",
 )
 
 retriever = vectorstore.as_retriever(
     search_type = 'similarity',
-    search_kwargs = {"k":2}
+    search_kwargs = {"k":3}
 )
 
+#RETRIEVERS IN LANGCHAIN ARE RUNNABLES
+
+query = "How do rockets work?"
+
+# retrievers in langchain are runnables, create chains using retrievers
+results = retriever.invoke(query)
+
+# All returned documents should be from the space topic
+print(f"{query}\n")
+for i, doc in enumerate(results, 1):
+    print(f"Result {i} [topic={doc.metadata['topic']}]")
+    print(f"{doc.page_content}")
+    print()
