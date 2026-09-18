@@ -30,3 +30,35 @@ docs = [
     Document(page_content="The presumption of innocence requires the prosecution to prove guilt beyond reasonable doubt.", metadata={"topic": "law"}),
     Document(page_content="Intellectual property law protects creations of the mind, including patents, trademarks, and copyrights.", metadata={"topic": "law"}),
 ]
+
+embed = GoogleGenerativeAIEmbeddings(
+    model="gemini-embedding-2-preview",
+    output_dimensionality=768
+)
+vector_store = Chroma.from_documents(
+    documents = docs,
+    embedding = embed ,
+    collection_name = "mmr_demo"
+)
+
+
+query = "deep learning model training and its optimization techniques"
+
+# lambda_mult controls the relevance-diversity trade-off:
+#   1.0 = pure relevance (identical to similarity search)
+#   0.0 = pure diversity (ignores relevance entirely)
+# fetch_k: number of candidate docs fetched before MMR re-ranks and selects k
+lambda_values = [1.0, 0.7, 0.5 ,0.0]
+
+for lm in lambda_values:
+    retriever = vector_store.as_retriever(
+        search_type="mmr",
+        search_kwargs={"k": 3, "fetch_k": 10, "lambda_mult": lm},
+    )
+    results = retriever.invoke(query)
+    
+    topics = [doc.metadata["topic"] for doc in results]
+    print(f"=== lambda_mult={lm} ===")
+    for i, doc in enumerate(results, 1):
+        print(f"  [{i}] topic={doc.metadata['topic']}: {doc.page_content}")
+    print()
