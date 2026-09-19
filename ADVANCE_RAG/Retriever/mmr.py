@@ -41,7 +41,6 @@ vector_store = Chroma.from_documents(
     collection_name = "mmr_demo"
 )
 
-
 query = "deep learning model training and its optimization techniques"
 
 # lambda_mult controls the relevance-diversity trade-off:
