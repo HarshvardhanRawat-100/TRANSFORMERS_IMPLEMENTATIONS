@@ -42,7 +42,6 @@ vector_store = Chroma.from_documents(
 )
 
 query = "deep learning model training and its optimization techniques"
-
 # lambda_mult controls the relevance-diversity trade-off:
 #   1.0 = pure relevance (identical to similarity search)
 #   0.0 = pure diversity (ignores relevance entirely)
