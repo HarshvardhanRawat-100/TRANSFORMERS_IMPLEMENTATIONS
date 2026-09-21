@@ -46,6 +46,8 @@ query = "deep learning model training and its optimization techniques"
 #   1.0 = pure relevance (identical to similarity search)
 #   0.0 = pure diversity (ignores relevance entirely)
 # fetch_k: number of candidate docs fetched before MMR re-ranks and selects k
+
+
 lambda_values = [1.0, 0.7, 0.5 ,0.0]
 
 for lm in lambda_values:
