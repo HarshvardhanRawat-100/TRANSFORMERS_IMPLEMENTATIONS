@@ -13,10 +13,8 @@ model = ChatGoogleGenerativeAI(
     temperature=0.7,
     google_api_key=os.getenv("GOOGLE_API_KEY_2")
 )
-
 # Tool
 search_tool = DuckDuckGoSearchRun()
-
 # Agent
 agent = create_agent(
     model=model,
