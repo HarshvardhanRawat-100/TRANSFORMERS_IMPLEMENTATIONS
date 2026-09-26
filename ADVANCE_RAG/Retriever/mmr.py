@@ -48,7 +48,6 @@ query = "deep learning model training and its optimization techniques"
 
 
 lambda_values = [1.0, 0.7, 0.5 ,0.0]
-
 for lm in lambda_values:
     retriever = vector_store.as_retriever(
         search_type="mmr",
