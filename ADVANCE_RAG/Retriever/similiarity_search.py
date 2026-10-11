@@ -47,7 +47,6 @@ vectorstore = Chroma.from_documents(
     embedding=embed,
     collection_name="similarity_search_demo",
 )
-
 retriever = vectorstore.as_retriever(
     search_type = 'similarity',
     search_kwargs = {"k":3}
