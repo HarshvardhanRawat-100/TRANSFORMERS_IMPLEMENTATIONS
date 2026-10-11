@@ -37,7 +37,6 @@ docs = [
 #for i , doc in enumerate(docs,1) :
    # print(f"Doc no. : {i} | Topic : {doc.metadata['topic']} ")
    # print(f"Content : {doc.page_content}\n")
-
 embed = GoogleGenerativeAIEmbeddings(
     model="gemini-embedding-2-preview",
     output_dimensionality=768
