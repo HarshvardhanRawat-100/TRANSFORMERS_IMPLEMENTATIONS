@@ -16,3 +16,44 @@ docs = [
     Document(page_content="Shakespeare wrote 37 plays and 154 sonnets, exploring themes of power, love, and betrayal.", metadata={"topic": "literature"}),
     Document(page_content="The novel Don Quixote by Cervantes, published in 1605, is often considered the first modern novel.", metadata={"topic": "literature"}),
 ]
+
+# BM25Retriever builds an inverted index from raw document text
+# No embedding model is involved — scoring is purely based on token overlap
+
+retriever = BM25Retriever.from_documents(docs,k=2)
+
+
+# Query 1: exact keyword match — BM25 excels here
+# The words "antibiotic" and "bacterial" appear directly in doc 1
+
+query1 = "antibiotic bacterial infection treatment and killing pathogens"
+results1 = retriever.invoke(query1)
+
+print(f"Query: '{query1}'")
+for i, doc in enumerate(results1, 1):
+    print(f"  [{i}] topic={doc.metadata['topic']}: {doc.page_content}")
+print()
+
+
+# Query 2: keyword match across a different topic
+# Words like "compound", "interest", and "returns" are present in finance docs
+
+query2 = "compound interest vs Simple interest and what gives a person partial stakes in a company"
+results2 = retriever.invoke(query2)
+print(f"Query: '{query2}'")
+
+for i, doc in enumerate(results2, 1):
+    print(f"  [{i}] topic={doc.metadata['topic']}: {doc.page_content}")
+print()
+
+
+# Query 3: semantic query with no keyword overlap — BM25 fails here
+# None of the docs contain the words "light", "airy", or "tall windows" together
+# The Gothic cathedral doc (doc 6) would be the ideal answer, but BM25 likely misses it
+
+query3 = "a structure that feels light and with windows"
+
+results3 = retriever.invoke(query3)
+print(f"Query: '{query3}'")
+for i, doc in enumerate(results3, 1):
+    print(f"  [{i}] topic={doc.metadata['topic']}: {doc.page_content}")
