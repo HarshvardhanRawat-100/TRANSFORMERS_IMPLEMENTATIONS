@@ -96,5 +96,23 @@ docs = [
 vector_store = InMemoryVectorStore.from_documents(documents = docs ,
     embedding = embeddings,)
 
-retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+base_retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+
+query = "How is CRISPR acting as a big enabler in creating personalized medicine?"
+
+
+# LLMChainExtractor: uses an LLM to extract only the relevant portions from each document
+compressor = LLMChainExtractor.from_llm(model)
+
+compression_retriever = ContextualCompressionRetriever(
+    base_compressor=compressor,
+    base_retriever=base_retriever,
+)
+
+compressed_results = compression_retriever.invoke(query)
+for i, doc in enumerate(compressed_results):
+    print(f"--- Compressed Result {i+1} [{doc.metadata.get('topic')}] ---")
+    print(doc.page_content)
+    print()
+
 
