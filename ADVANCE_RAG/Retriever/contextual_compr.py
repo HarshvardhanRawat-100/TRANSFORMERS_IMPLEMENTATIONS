@@ -116,3 +116,39 @@ for i, doc in enumerate(compressed_results):
     print()
 
 
+# EmbeddingsFilter: drops entire documents whose embedding similarity to the query is below the threshold
+embeddings_filter = EmbeddingsFilter(
+    embeddings=embeddings,
+    similarity_threshold=0.732,
+)
+
+compression_retriever_emb = ContextualCompressionRetriever(
+    base_compressor=embeddings_filter,
+    base_retriever=base_retriever,
+)
+
+emb_results = compression_retriever_emb.invoke(query)
+for i, doc in enumerate(emb_results):
+    score = doc.metadata.get("relevance_score", "N/A")
+    print(f"--- Filtered Result {i+1} [{doc.metadata.get('topic')}] (score: {score}) ---")
+    print(doc.page_content)
+    print()
+
+
+
+# DocumentCompressorPipeline: chain multiple compressors together
+# First filter by embeddings (cheap), then extract with LLM (expensive) — minimizes LLM calls
+pipeline_compressor = DocumentCompressorPipeline(
+    transformers=[embeddings_filter, compressor]
+)
+
+compression_retriever_pipeline = ContextualCompressionRetriever(
+    base_compressor=pipeline_compressor,
+    base_retriever=base_retriever,
+)
+
+pipeline_results = compression_retriever_pipeline.invoke(query)
+for i, doc in enumerate(pipeline_results):
+    print(f"--- Pipeline Result {i+1} [{doc.metadata.get('topic')}] ---")
+    print(doc.page_content)
+    print()
