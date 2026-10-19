@@ -304,5 +304,3 @@ print(
     f"Retrieval + compression latency: "
     f"{compressed_latency:.3f} seconds"
 )
-
-
