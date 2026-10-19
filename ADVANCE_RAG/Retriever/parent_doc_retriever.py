@@ -262,11 +262,9 @@ for i, doc in enumerate(compressed_results, start=1):
     print(f"\nDocument {i}")
     print(doc.page_content)
 
-
 # ============================================================
 # EXPERIMENT 1: COMPRESSION METRICS AND LATENCY
 # ============================================================
-
 print("\n" + "#" * 60)
 print("EXPERIMENT 1: COMPRESSION METRICS")
 print("#" * 60)
