@@ -20,7 +20,7 @@ class JokeState(TypedDict):
 def generate_joke(state: JokeState):
 
     prompt = f'generate a joke on the topic {state["topic"]}'
-    response = model.invoke(prompt).content
+    response = model.invoke(prompt).text
 
     return {'joke': response}
 
@@ -29,7 +29,7 @@ def generate_joke(state: JokeState):
 def generate_explanation(state: JokeState):
 
     prompt = f'write an explanation for the joke - {state["joke"]}'
-    response = model.invoke(prompt).content
+    response = model.invoke(prompt).text
 
     return {'explanation': response}
 
