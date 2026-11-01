@@ -102,7 +102,6 @@ graph.add_node("evaluate_language", evaluate_language)
 graph.add_node("evaluate_analysis", evaluate_analysis)
 graph.add_node("evaluate_thought", evaluate_thought)
 graph.add_node("final_evaluation", final_evaluation)
-
 # Fan-out → join
 graph.add_edge(START, "evaluate_language")
 graph.add_edge(START, "evaluate_analysis")
