@@ -10,6 +10,7 @@ from langchain_core.tools import tool
 from dotenv import load_dotenv
 import requests
 import os 
+from langgraph.checkpoint.memory import InMemorySaver
 
 load_dotenv()
 
@@ -60,3 +61,32 @@ def chat_node(state: ChatState):
     return {"messages": [response]}
 
 tool_node = ToolNode(tools)
+
+checkpointer = InMemorySaver()
+
+graph = StateGraph(ChatState)
+graph.add_node("chat_node", chat_node)
+graph.add_node("tools", tool_node)
+
+graph.add_edge(START, "chat_node")
+
+graph.add_conditional_edges("chat_node",tools_condition)
+graph.add_edge('tools', 'chat_node')
+
+chatbot = graph.compile(checkpointer=checkpointer)
+
+config = {"configurable": {"thread_id": "1"}}
+
+while True:
+    user_input = input("You: ")
+
+    if user_input.lower() in ["exit", "quit"]:
+        break
+
+    response = chatbot.invoke(
+        {"messages": [HumanMessage(content=user_input)]},
+        config=config
+    )
+
+    print("AI:", response["messages"][-1].text)
+
