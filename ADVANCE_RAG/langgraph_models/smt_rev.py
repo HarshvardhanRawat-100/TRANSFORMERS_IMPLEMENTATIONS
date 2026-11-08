@@ -11,6 +11,7 @@ model = ChatGoogleGenerativeAI(model="gemini-3.5-flash",
 def call_model(state: MessagesState):
     response = model.invoke(state["messages"])
     return {"messages": [response]}
+
 builder = StateGraph(MessagesState)
 builder.add_node("call_model", call_model)
 builder.add_edge(START, "call_model")
@@ -32,4 +33,4 @@ config = {"configurable": {"thread_id": "thread-1"}}
 config2 = {"configurable": {"thread_id": "thread-2"}}
 graph.invoke({"messages": [{"role": "user", "content": " My name is BATMAN."}]}, config)
 
-print(graph.invoke({"messages": [{"role": "user", "content": "What is my name?"}]}, config2))
+print(graph.invoke({"messages": [{"role": "user", "content": "What is my name?"}]}, config)["messages"][-1].content[0]["text"])
