@@ -25,7 +25,6 @@ store.put(namespace, "9", {"data": "User likes real-world analogies"})
 store.put(namespace, "10", {"data": "User prefers bullet points over paragraphs"})
 store.put(namespace, "10", {"data": "User name is BATMANS"})
 
-
 items = store.search(namespace, query="what is the user's name", limit=1)
 
 for item in items:
