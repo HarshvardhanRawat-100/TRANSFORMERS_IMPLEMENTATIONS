@@ -1,28 +1,20 @@
 from dotenv import load_dotenv
 load_dotenv()
-import os 
+
+import uuid
+from typing import List
+from pydantic import BaseModel, Field
+
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.runnables import RunnableConfig
 from langchain_core.messages import SystemMessage
+from langchain_core.runnables import RunnableConfig
+import os 
 from langgraph.graph import StateGraph, START, END, MessagesState
-from langgraph.store.memory import InMemoryStore
+from langgraph.store.postgres import PostgresStore
 from langgraph.store.base import BaseStore
 
-# 1) Create LTM store + seed memories (done BEFORE running the graph)
-store = InMemoryStore()
-user_id = "u1"
 
-# Store user details as a single blob (simple for teaching)
-# You can also split into multiple records; this keeps it easy.
-user_details = ("user", user_id, "details")
-
-store.put(user_details, "profile_1", {"data": "Name: Nitish"})
-store.put(user_details, "profile_2", {"data": "Profession: Teaches AI on YouTube"})
-store.put(user_details, "preference_1", {"data": "Prefers concise answers"})
-store.put(user_details, "preference_2", {"data": "Likes examples in Python"})
-store.put(user_details, "project_1", {"data": "Building MCP servers (Python-based project)"})
-
-# 2) System prompt template (your prompt)
+# 2) System prompt
 # ----------------------------
 SYSTEM_PROMPT_TEMPLATE = """You are a helpful assistant with memory capabilities.
 If user-specific memory is available, use it to personalize 
@@ -32,12 +24,11 @@ Your goal is to provide relevant, friendly, and tailored
 assistance that reflects the user’s preferences, context, and past interactions.
 
 If the user’s name or relevant personal context is available, always personalize your responses by:
-    – Always Address the user by name (e.g., "Sure, BATMAN...") when appropriate
-    – Referencing known projects, tools, or preferences (e.g., "your MCP  server python based project")
+    – Always Address the user by name (e.g., "Sure, BATMAN(bruce wayne)...") when appropriate
+    – Referencing known projects, tools, or preferences (e.g., "your MCP server python based project")
     – Adjusting the tone to feel friendly, natural, and directly aimed at the user
 
-Avoid generic phrasing when personalization is possible. For example, instead of "In TypeScript apps..." 
-say "Since your project is built with TypeScript..."
+Avoid generic phrasing when personalization is possible.
 
 Use personalization especially in:
     – Greetings and transitions
@@ -48,5 +39,111 @@ Always ensure that personalization is based only on known user details and not a
 
 In the end suggest 3 relevant further questions based on the current response and user profile
 
-The user’s memory (which may be empty) is provided as: {user_details_content}"""
+The user’s memory (which may be empty) is provided as: {user_details_content}
+"""
+
+memory_llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash",
+    google_api_key=os.getenv("GOOGLE_API_KEY_4"))
+
+class MemoryItem(BaseModel):
+    text: str = Field(description="Atomic user memory")
+    is_new: bool = Field(description="True if new, false if duplicate")
+
+class MemoryDecision(BaseModel):
+    should_write: bool
+    memories: List[MemoryItem] = Field(default_factory=list)
+
+memory_extractor = memory_llm.with_structured_output(MemoryDecision)
+MEMORY_PROMPT = """You are responsible for updating and maintaining accurate user memory.
+
+CURRENT USER DETAILS (existing memories):
+{user_details_content}
+
+TASK:
+- Review the user's latest message.
+- Extract user-specific info worth storing long-term (identity, stable preferences, ongoing projects/goals).
+- For each extracted item, set is_new=true ONLY if it adds NEW information compared to CURRENT USER DETAILS.
+- If it is basically the same meaning as something already present, set is_new=false.
+- Keep each memory as a short atomic sentence.
+- No speculation; only facts stated by the user.
+- If there is nothing memory-worthy, return should_write=false and an empty list.
+"""
+
+# 3) Nodes
+# ----------------------------
+def remember_node(state: MessagesState, config: RunnableConfig, *, store: BaseStore):
+    user_id = config["configurable"]["user_id"]
+    ns = ("user", user_id, "details")
+
+    # existing memory (all items under namespace)
+    items = store.search(ns)
+    existing = "\n".join(it.value.get("data", "") for it in items) if items else "(empty)"
+
+    # latest user message
+    last_text = state["messages"][-1].content
+
+    decision: MemoryDecision = memory_extractor.invoke(
+        [
+            SystemMessage(content=MEMORY_PROMPT.format(user_details_content=existing)),
+            {"role": "user", "content": last_text},
+        ]
+    )
+
+    if decision.should_write:
+        for mem in decision.memories:
+            if mem.is_new and mem.text.strip():
+                store.put(ns, str(uuid.uuid4()), {"data": mem.text.strip()})
+
+    return {}
+
+llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash",temperature = 0.9,
+    google_api_key=os.getenv("GOOGLE_API_KEY_4"))
+
+def chat_node(state: MessagesState, config: RunnableConfig, *, store: BaseStore):
+    user_id = config["configurable"]["user_id"]
+    ns = ("user", user_id, "details")
+
+    items = store.search(ns)
+    user_details = "\n".join(it.value.get("data", "") for it in items) if items else ""
+
+    system_msg = SystemMessage(
+        content=SYSTEM_PROMPT_TEMPLATE.format(user_details_content=user_details or "(empty)")
+    )
+
+    response = llm.invoke([system_msg] + state["messages"])
+    return {"messages": [response]}
+
+# 4) Build graph
+# ----------------------------
+builder = StateGraph(MessagesState)
+builder.add_node("remember", remember_node)
+builder.add_node("chat", chat_node)
+builder.add_edge(START, "remember")
+builder.add_edge("remember", "chat")
+builder.add_edge("chat", END)
+
+
+# 5) Use PostgresStore (PERSISTENT LTM)
+# ----------------------------
+DB_URI = "postgresql://postgres:postgres@localhost:5442/postgres?sslmode=disable"
+
+with PostgresStore.from_conn_string(DB_URI) as store:
+    # IMPORTANT: run ONCE the first time you use this database
+    store.setup()
+
+    graph = builder.compile(store=store)
+
+    config = {"configurable": {"user_id": "u1"}}
+
+    graph.invoke({"messages": [{"role": "user", "content": "Hi, my name is BATMAN"}]}, config)
+    graph.invoke({"messages": [{"role": "user", "content": "I am owner of wayne enterprises and i am angel investor and building startup ecosystem"}]}, config)
+
+    out = graph.invoke({"messages": [{"role": "user", "content": "Explain me what new startup can i try building so yc can invest in that"}]}, config)
+    print(out["messages"][-1].content[0]["text"])
+
+    print("\n--- Stored Memories (from Postgres) ---")
+    for it in store.search(("user", "u1", "details")):
+        print(it.value["data"])
+
+
 
